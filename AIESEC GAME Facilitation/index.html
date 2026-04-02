@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leading the Change — AIESEC Leadership Game</title>
+<meta name="description" content="An Ace Attorney-styled interactive visual novel about AIESEC leadership">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Inter',sans-serif;user-select:none}
+#game{width:960px;height:540px;position:relative;overflow:hidden;border:3px solid #444;box-shadow:0 0 40px rgba(3,126,243,0.3);image-rendering:pixelated}
+
+.scr{position:absolute;inset:0;display:none;flex-direction:column}
+.scr.on{display:flex}
+
+/* TITLE */
+#title{background:linear-gradient(135deg,#0a0e27,#1a235a);align-items:center;justify-content:center;text-align:center;z-index:100}
+#title h1{font-family:'Press Start 2P',monospace;color:#f5a623;text-shadow:4px 4px 0 #000;font-size:28px;line-height:1.6;margin-bottom:8px;animation:glow 2s ease-in-out infinite alternate}
+#title h2{font-family:'Press Start 2P',monospace;color:#ccc;font-size:10px;margin-bottom:40px;line-height:1.8}
+@keyframes glow{from{text-shadow:4px 4px 0 #000,0 0 10px rgba(245,166,35,0.3)}to{text-shadow:4px 4px 0 #000,0 0 30px rgba(245,166,35,0.7)}}
+
+.btn{background:#037ef3;color:#fff;border:3px solid #fff;padding:14px 28px;font:700 16px 'Press Start 2P',monospace;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:1px}
+.btn:hover{background:#f5a623;color:#000;transform:scale(1.08)}
+.btn-sm{font-size:12px;padding:10px 20px}
+
+/* GAME SCREEN */
+#gs{background-size:cover;background-position:center;transition:background-image .4s}
+
+/* Round Banner */
+#round-banner{position:absolute;top:0;left:0;right:0;text-align:center;padding:8px;font:700 11px 'Press Start 2P',monospace;color:#f5a623;background:linear-gradient(180deg,rgba(0,0,0,0.7),transparent);z-index:22;opacity:0;transition:opacity .5s}
+#round-banner.show{opacity:1}
+
+/* HUD */
+#hud{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:4px;font:10px 'Press Start 2P',monospace;z-index:25;border:1px solid #555;display:none}
+
+/* Characters */
+#chars{position:absolute;bottom:150px;width:100%;height:calc(100% - 150px);display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:20;padding:0 40px}
+.chr{max-height:95%;max-width:42%;object-fit:contain;opacity:0;transform:translateY(30px);transition:all .35s ease;image-rendering:pixelated}
+.chr.on{opacity:1;transform:translateY(0)}
+.chr.talk{filter:brightness(1.15) drop-shadow(0 0 8px rgba(255,255,255,0.4))}
+.chr.dim{filter:brightness(0.5)}
+
+/* Dialogue Box */
+#dbox{position:absolute;bottom:0;width:100%;height:150px;z-index:30;display:flex;justify-content:center;padding-bottom:8px}
+#db{width:94%;height:100%;background:rgba(0,0,0,0.88);border:3px solid #fff;border-radius:6px;position:relative;padding:22px 28px;cursor:pointer;box-shadow:inset 0 0 30px rgba(0,0,0,0.9)}
+#spk{position:absolute;top:-14px;left:18px;background:#037ef3;color:#fff;padding:4px 14px;border:2px solid #fff;border-radius:3px;font:700 14px 'Inter',sans-serif;letter-spacing:1px;box-shadow:2px 2px 0 rgba(0,0,0,0.5)}
+#dtxt{font-size:20px;line-height:1.45;color:#fff;text-shadow:1px 1px 2px #000;min-height:60px}
+#nxt{position:absolute;bottom:8px;right:18px;font-size:22px;color:#f5a623;display:none;animation:bob 1s infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+
+/* Choices */
+#chs{position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:40;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;opacity:0;pointer-events:none;transition:opacity .3s}
+#chs.on{opacity:1;pointer-events:auto}
+#chs-title{font:700 13px 'Press Start 2P',monospace;color:#f5a623;margin-bottom:10px;text-shadow:2px 2px 0 #000}
+.cbtn{width:82%;background:rgba(3,126,243,0.85);border:2px solid #fff;color:#fff;padding:14px 18px;font:16px 'Inter',sans-serif;border-radius:4px;cursor:pointer;transition:all .2s;text-align:left;box-shadow:0 3px 8px rgba(0,0,0,0.4)}
+.cbtn:hover{background:#f5a623;color:#000;transform:translateX(12px);border-color:#000}
+
+/* Coaching Insight */
+#ins{position:absolute;inset:0;background:rgba(0,0,0,0.88);z-index:50;display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#ins.on{opacity:1;pointer-events:auto}
+.ins-box{background:linear-gradient(to bottom,#2c3e50,#1a252f);border:4px solid #f5a623;width:78%;padding:28px;text-align:center;border-radius:10px;box-shadow:0 0 40px rgba(245,166,35,0.4);transform:scale(0.85);transition:transform .3s cubic-bezier(.175,.885,.32,1.275)}
+#ins.on .ins-box{transform:scale(1)}
+.ins-flash{font:22px 'Press Start 2P',monospace;color:#f5a623;margin-bottom:18px;text-shadow:2px 2px 0 #000;animation:flsh .4s infinite alternate}
+@keyframes flsh{from{color:#f5a623}to{color:#fff}}
+.ins-p{color:#fff;font-size:20px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.ins-d{font-size:16px;line-height:1.5;color:#ddd;margin-bottom:24px}
+
+/* Flash & Shake */
+#flash{position:absolute;inset:0;background:#fff;z-index:90;opacity:0;pointer-events:none}
+.fla{animation:fla .25s ease-out}
+@keyframes fla{0%{opacity:1}100%{opacity:0}}
+.shk{animation:shk .5s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shk{10%,90%{transform:translate3d(-2px,0,0)}20%,80%{transform:translate3d(4px,0,0)}30%,50%,70%{transform:translate3d(-7px,0,0)}40%,60%{transform:translate3d(7px,0,0)}}
+
+/* Ending */
+#end{background:#0a0e27;z-index:100;text-align:center;justify-content:center;align-items:center;padding:35px;overflow-y:auto}
+#end-t{font:24px 'Press Start 2P',monospace;margin-bottom:18px;line-height:1.6}
+.end-happy{color:#4ade80;text-shadow:2px 2px 0 #000}
+.end-neutral{color:#facc15;text-shadow:2px 2px 0 #000}
+.end-bad{color:#f87171;text-shadow:2px 2px 0 #000}
+#end-score{font-size:18px;background:rgba(0,0,0,0.5);padding:12px 20px;border-radius:8px;margin-bottom:20px;border:2px solid #555;color:#fff}
+#end-txt{font-size:16px;line-height:1.7;margin-bottom:25px;max-width:750px;color:#ddd}
+#end-quote{font-style:italic;color:#f5a623;font-size:14px;margin-bottom:25px;max-width:600px}
+</style>
+</head>
+<body>
+<div id="game">
+<div id="flash"></div>
+<div id="hud">TTP: <span id="ttp-val">0</span></div>
+
+<div id="title" class="scr on">
+<h1>LEADING<br>THE CHANGE</h1>
+<h2>An AIESEC Interactive<br>Leadership Story</h2>
+<button class="btn" onclick="go()">START GAME</button>
+</div>
+
+<div id="gs" class="scr">
+<div id="round-banner"></div>
+<div id="chars">
+<img id="cL" class="chr" src="" alt="">
+<img id="cR" class="chr" src="" alt="">
+</div>
+<div id="dbox"><div id="db" onclick="adv()">
+<div id="spk">Narrator</div>
+<div id="dtxt"></div>
+<div id="nxt">▼</div>
+</div></div>
+
+<div id="chs">
+<div id="chs-title">What will Loong Jie do?</div>
+<button class="cbtn" id="c0" onclick="pick(0)"></button>
+<button class="cbtn" id="c1" onclick="pick(1)"></button>
+<button class="cbtn" id="c2" onclick="pick(2)"></button>
+</div>
+
+<div id="ins">
+<div class="ins-box">
+<div class="ins-flash">LEADERSHIP MOMENT!</div>
+<div class="ins-p" id="ins-p"></div>
+<div class="ins-d" id="ins-d"></div>
+<button class="btn btn-sm" onclick="nextAfterInsight()">Continue</button>
+</div>
+</div>
+</div>
+
+<div id="end" class="scr">
+<div id="end-t"></div>
+<div id="end-score">Team Trust Points: <strong id="end-s">0</strong> / 36</div>
+<div id="end-txt"></div>
+<div id="end-quote"></div>
+<button class="btn" onclick="location.reload()">Play Again</button>
+</div>
+</div>
+
+<script src="story.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>
