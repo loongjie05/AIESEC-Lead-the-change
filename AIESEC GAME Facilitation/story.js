@@ -5,7 +5,7 @@ const STORY = {
         { spk: 'Loong Jie', txt: "I can't believe I actually got it. Director. Me." },
         { spk: 'Loong Jie', txt: "I've never led anything before — not a club, not a project, not even a group assignment where I was actually in charge." },
         { spk: 'Loong Jie', txt: "But I applied because I believe in what AIESEC does. I want Malaysian youth to experience volunteering that changes their lives." },
-        { spk: 'Narrator', txt: "He looks at the whiteboard and writes: 'Goal: Open a project. Get 40 volunteers. Make it happen.'" },
+        { spk: 'Narrator', txt: "He looks at the whiteboard and writes: 'Goal: Open a project. Get 40 volunteers. Get AUTAR an award.'" },
         { spk: 'Loong Jie', txt: "The timeline is tight. We have only a few months to plan everything — school partnerships, project agenda, budget, volunteer interviews... the whole thing." },
         { spk: 'Loong Jie', txt: "And I'm about to meet my team for the first time. People I'll be leading. People who are counting on me." },
         { cL: 'lj_sweat', spk: 'Loong Jie', sfx: 'tension', txt: "...I have no idea what I'm doing." },
